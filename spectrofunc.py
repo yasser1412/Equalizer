@@ -1,3 +1,8 @@
+from scipy import signal
+import matplotlib.pyplot as plt
+import numpy as np
+import pyqtgraph
+
 def plot_spectro(self,file):
         
         #### self.graphicsView_4 is the plot widget u can change it
