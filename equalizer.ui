@@ -18,16 +18,6 @@
     <normaloff>../Python2/signal.png</normaloff>../Python2/signal.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QGraphicsView" name="graphicsView">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>11</y>
-      <width>691</width>
-      <height>281</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="PlotWidget" name="graphWidget" native="true">
     <property name="geometry">
      <rect>
@@ -35,6 +25,16 @@
       <y>309</y>
       <width>691</width>
       <height>251</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="PlotWidget" name="graphicsView" native="true">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>19</y>
+      <width>691</width>
+      <height>281</height>
      </rect>
     </property>
    </widget>
@@ -51,18 +51,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="OpenSignalBtn"/>
-   <addaction name="ZoomIn"/>
-   <addaction name="ZoomOut"/>
-   <addaction name="Beginning"/>
    <addaction name="PlayBtn"/>
-   <addaction name="End"/>
-   <addaction name="Pause"/>
-   <addaction name="AddPanel"/>
-   <addaction name="DeletePanel"/>
-   <addaction name="spectrogram"/>
-   <addaction name="PDF"/>
-   <addaction name="LeftScroll"/>
-   <addaction name="RightScroll"/>
   </widget>
   <action name="actionOpen_signal">
    <property name="text">
@@ -100,51 +89,6 @@
     <bool>true</bool>
    </property>
   </action>
-  <action name="ZoomIn">
-   <property name="icon">
-    <iconset>
-     <normaloff>../Task1_sigview/icons/zoom-in.png</normaloff>../Task1_sigview/icons/zoom-in.png</iconset>
-   </property>
-   <property name="text">
-    <string>ZoomIn</string>
-   </property>
-   <property name="toolTip">
-    <string>ZoomIn</string>
-   </property>
-   <property name="shortcut">
-    <string>Down, Ctrl++</string>
-   </property>
-  </action>
-  <action name="ZoomOut">
-   <property name="icon">
-    <iconset>
-     <normaloff>../Task1_sigview/icons/zoom-out.png</normaloff>../Task1_sigview/icons/zoom-out.png</iconset>
-   </property>
-   <property name="text">
-    <string>ZoomOut</string>
-   </property>
-   <property name="toolTip">
-    <string>ZoomOut</string>
-   </property>
-   <property name="shortcut">
-    <string>Up, Ctrl+-</string>
-   </property>
-  </action>
-  <action name="Beginning">
-   <property name="icon">
-    <iconset>
-     <normaloff>../Task1_sigview/icons/backward.png</normaloff>../Task1_sigview/icons/backward.png</iconset>
-   </property>
-   <property name="text">
-    <string>Beggining</string>
-   </property>
-   <property name="toolTip">
-    <string>Beggining</string>
-   </property>
-   <property name="shortcut">
-    <string>Home</string>
-   </property>
-  </action>
   <action name="PlayBtn">
    <property name="icon">
     <iconset>
@@ -158,138 +102,6 @@
    </property>
    <property name="shortcut">
     <string>F5</string>
-   </property>
-  </action>
-  <action name="End">
-   <property name="icon">
-    <iconset>
-     <normaloff>../Task1_sigview/icons/forward.png</normaloff>../Task1_sigview/icons/forward.png</iconset>
-   </property>
-   <property name="text">
-    <string>End</string>
-   </property>
-   <property name="toolTip">
-    <string>End</string>
-   </property>
-   <property name="shortcut">
-    <string>End</string>
-   </property>
-  </action>
-  <action name="Pause">
-   <property name="icon">
-    <iconset>
-     <normaloff>../Task1_sigview/icons/pause.png</normaloff>../Task1_sigview/icons/pause.png</iconset>
-   </property>
-   <property name="text">
-    <string>Pause</string>
-   </property>
-   <property name="toolTip">
-    <string>Pause</string>
-   </property>
-   <property name="shortcut">
-    <string>F7</string>
-   </property>
-  </action>
-  <action name="spectrogram">
-   <property name="icon">
-    <iconset>
-     <normaloff>../Task1_sigview/icons/Spectrogram.png</normaloff>../Task1_sigview/icons/Spectrogram.png</iconset>
-   </property>
-   <property name="text">
-    <string>Spectrogram</string>
-   </property>
-   <property name="toolTip">
-    <string>Spectrogram</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Q</string>
-   </property>
-  </action>
-  <action name="PDF">
-   <property name="icon">
-    <iconset>
-     <normaloff>../Task1_sigview/icons/pdf.png</normaloff>../Task1_sigview/icons/pdf.png</iconset>
-   </property>
-   <property name="text">
-    <string>PDF</string>
-   </property>
-   <property name="toolTip">
-    <string>PDF</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
-  </action>
-  <action name="ClearSignal">
-   <property name="text">
-    <string>Clear Signal</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+C</string>
-   </property>
-  </action>
-  <action name="AddChannel">
-   <property name="text">
-    <string>Add Channel</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+N</string>
-   </property>
-  </action>
-  <action name="DeleteChannel">
-   <property name="text">
-    <string>Delete Channel</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+D</string>
-   </property>
-  </action>
-  <action name="AddPanel">
-   <property name="icon">
-    <iconset>
-     <normaloff>../Task1_sigview/icons/addChannel.png</normaloff>../Task1_sigview/icons/addChannel.png</iconset>
-   </property>
-   <property name="text">
-    <string>Add panel</string>
-   </property>
-   <property name="toolTip">
-    <string>Add Panel</string>
-   </property>
-  </action>
-  <action name="DeletePanel">
-   <property name="icon">
-    <iconset>
-     <normaloff>../Task1_sigview/icons/delete.png</normaloff>../Task1_sigview/icons/delete.png</iconset>
-   </property>
-   <property name="text">
-    <string>Delete Panel</string>
-   </property>
-   <property name="toolTip">
-    <string>Delete Panel</string>
-   </property>
-  </action>
-  <action name="LeftScroll">
-   <property name="icon">
-    <iconset>
-     <normaloff>../Task1_sigview/icons/left.png</normaloff>../Task1_sigview/icons/left.png</iconset>
-   </property>
-   <property name="text">
-    <string>Scroll Left</string>
-   </property>
-   <property name="toolTip">
-    <string>Scroll Left</string>
-   </property>
-  </action>
-  <action name="RightScroll">
-   <property name="icon">
-    <iconset>
-     <normaloff>../Task1_sigview/icons/right.png</normaloff>../Task1_sigview/icons/right.png</iconset>
-   </property>
-   <property name="text">
-    <string>Right Scroll</string>
-   </property>
-   <property name="toolTip">
-    <string>Right Scroll</string>
    </property>
   </action>
  </widget>
