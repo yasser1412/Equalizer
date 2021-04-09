@@ -28,7 +28,6 @@ import librosa
 MAIN_WINDOW,_=loadUiType(path.join(path.dirname(__file__),"equalizer.ui"))
 
 class MainApp(QMainWindow,MAIN_WINDOW):
-    
     def __init__(self,parent=None):
         super(MainApp,self).__init__(parent)
         QMainWindow.__init__(self)
@@ -36,25 +35,20 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         self.Toolbar()
 
     def Toolbar(self):
-        # self.PlayBtn.triggered.connect(self.play_audio)
+        self.PlayBtn.triggered.connect(self.play_audio)
         self.OpenSignalBtn.triggered.connect(self.BrowseSignal)
 
     def BrowseSignal(self):
+        global fileName
         fileName, _ = QtWidgets.QFileDialog.getOpenFileName(None,"QFileDialog.getOpenFileName()", "","WAV Files (*.wav)")
-        # audio_file = read(fileName) 
-        # sampling_rate = audio_file[0] 
-        # audio = audio_file[1]
-        # audio2= audio.astype(float)
         samples, sampling_rate = librosa.load(fileName, sr=None, mono=True, offset=0.0, duration=None)
         l=len(samples)
         self.plotAudio(samples,l)
         self.fft(samples,sampling_rate,l)
-        #self.playAudio(fileName)
         #self.plot_spectro(samples,sampling_rate)
         
         print(samples)
         print(l)
-        #print(play)
 
     def plotAudio(self,file,length):
         self.graphWidget.plot(file[0:length],pen="b")
@@ -66,8 +60,8 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         xf = rfftfreq(n,T)
         plt.plot(xf, np.abs(yf))
         plt.grid()
-        """ plt.xlable("Frequency -->")
-        plt.ylable("Magnitude") """
+        plt.xlabel("Frequency")
+        plt.ylabel("Magnitude")
         plt.show()
         print(n)
 
@@ -75,14 +69,11 @@ class MainApp(QMainWindow,MAIN_WINDOW):
     #     play = True  
     #     print(play)
 
-    # def playAudio(self,file):
-    #     if play == True:
-    #         wave_obj = sa.WaveObject.from_wave_file(file)
-    #         play_obj = wave_obj.play()
-    #         play_obj.wait_done()  # Wait until sound has finished playing 
+    def play_audio(self):
+        wave_obj = sa.WaveObject.from_wave_file(fileName)
+        play_obj = wave_obj.play()
 
     def plot_spectro(self,file,sampling_rate):
-
         plt.specgram(file,Fs=sampling_rate)
         plt.xlabel('Time')
         plt.ylabel('Frequency')
@@ -93,7 +84,7 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         pg.setConfigOptions(imageAxisOrder='col-major')
         # the function that plot spectrogram of the selected signal
         f, t, Sxx = signal.spectrogram(file,10)
-        
+
         # Item for displaying image data
         img = pg.ImageItem()
         self.graphicsView.addItem(img)
