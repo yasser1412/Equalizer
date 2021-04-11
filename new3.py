@@ -85,7 +85,8 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         #self.beforeWidget.plot(file[0:length],pen="r")
         self.beforeWidget.setLabel('bottom', "Frequency", units='Hz')
         #self.beforeWidget.setLabel('bottom', "Time", units='s')
-        self.beforeWidget.setLabel('left', "Amplitude")
+        self.beforeWidget.setLabel('left', "Magnitude")
+        #self.beforeWidget.setLabel('left', "Amplitude")
         self.beforeWidget.plotItem.setTitle("Before")
 
     def plotAfter(self,file,sampling_rate,length):
@@ -99,7 +100,8 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         #self.afterWidget.plot(file[0:length],pen="b")
         self.afterWidget.setLabel('bottom', "Frequency", units='Hz')
         #self.afterWidget.setLabel('bottom', "Time", units='s')
-        self.afterWidget.setLabel('left', "Amplitude")
+        self.afterWidget.setLabel('left', "Magnitude")
+        #self.afterWidget.setLabel('left', "Amplitude")
         self.afterWidget.plotItem.setTitle("After")
         
         sd.play(file, sampling_rate)
