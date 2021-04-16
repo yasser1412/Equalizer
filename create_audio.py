@@ -3,7 +3,7 @@ import wave
 import struct
 
 def make_sine(freq=440, datasize=10000, fname="test.wav", framerate=44100.00):
-    amp=8000.0 # amplitude
+    amp = 800.0 # amplitude
     sine_list=[]
     for x in range(datasize):
         sine_list.append(math.sin(2*math.pi * (x+1) * freq * ( x/frate)))
