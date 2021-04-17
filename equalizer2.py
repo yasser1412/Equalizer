@@ -6,7 +6,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from os import path
-import scipy.fft
+import scipy
+import scipy.fft as fft
 import queue as Q
 import pandas as pd
 import numpy as np
@@ -145,11 +146,14 @@ class MainApp(QMainWindow,MAIN_WINDOW):
 
     def plotBefore(self,file,sampling_rate,length):
         ##plot before equalizing
-        global n,yf
-        n=length
+        global N
+        
+        N=length
         T=1/sampling_rate
         yf = fft(file)
-        #xf = fftfreq(n,T)
+        self.new_yf=yf.copy()
+
+        # xf = fftfreq(N,T)
         #print(n,T,yf,xf)
         # phase = np.angle(file)
         # print(phase)
@@ -157,15 +161,15 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         self.beforeWidget_list[self.tabWidget.currentIndex()].clear()
         
         #self.beforeWidget_list[self.tabWidget.currentIndex()].plot(xf, np.abs(yf),pen="r")
-        self.beforeWidget_list[self.tabWidget.currentIndex()].plot(file[0:sampling_rate],pen="r")
+        self.beforeWidget_list[self.tabWidget.currentIndex()].plot(file,pen="r")
         #self.beforeWidget_list[self.tabWidget.currentIndex()].setLabel('bottom', "Frequency", units='Hz')
         self.beforeWidget_list[self.tabWidget.currentIndex()].setLabel('bottom', "Time", units='s')
         #self.beforeWidget_list[self.tabWidget.currentIndex()].setLabel('left', "Magnitude")
         self.beforeWidget_list[self.tabWidget.currentIndex()].setLabel('left', "Amplitude")
         
-        self.beforeWidget_list[self.tabWidget.currentIndex()].setLimits(xMin = 0, xMax=xf[-1])
-        self.beforeWidget_list[self.tabWidget.currentIndex()].plotItem.setTitle("Before")
-        self.beforeWidget_list[self.tabWidget.currentIndex()].enableAutoRange(axis='y')
+        # self.beforeWidget_list[self.tabWidget.currentIndex()].setLimits(xMin = 0, xMax=xf[-1])
+        # self.beforeWidget_list[self.tabWidget.currentIndex()].plotItem.setTitle("Before")
+        # self.beforeWidget_list[self.tabWidget.currentIndex()].enableAutoRange(axis='y')
 
     def plotAfter(self,file,sampling_rate,length):
         ##plot after equalizing
@@ -178,15 +182,15 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         self.afterWidget_list[self.tabWidget.currentIndex()].clear()
         
         #self.afterWidget_list[self.tabWidget.currentIndex()].plot(xf, np.abs(yf),pen="b")
-        self.afterWidget_list[self.tabWidget.currentIndex()].plot(file[0:sampling_rate],pen="b")
+        self.afterWidget_list[self.tabWidget.currentIndex()].plot(file,pen="b")
         #self.afterWidget_list[self.tabWidget.currentIndex()].setLabel('bottom', "Frequency", units='Hz')
         self.afterWidget_list[self.tabWidget.currentIndex()].setLabel('bottom', "Time", units='s')
         #self.afterWidget_list[self.tabWidget.currentIndex()].setLabel('left', "Magnitude")
         self.afterWidget_list[self.tabWidget.currentIndex()].setLabel('left', "Amplitude")
         
-        self.afterWidget_list[self.tabWidget.currentIndex()].setLimits(xMin = 0, xMax=xf[-1])
-        self.afterWidget_list[self.tabWidget.currentIndex()].plotItem.setTitle("After")
-        self.afterWidget_list[self.tabWidget.currentIndex()].enableAutoRange(axis = "y")
+        # self.afterWidget_list[self.tabWidget.currentIndex()].setLimits(xMin = 0, xMax=xf[-1])
+        # self.afterWidget_list[self.tabWidget.currentIndex()].plotItem.setTitle("After")
+        # self.afterWidget_list[self.tabWidget.currentIndex()].enableAutoRange(axis = "y")
         sd.play(file, sampling_rate)
 
     def play_audio(self):
@@ -313,39 +317,39 @@ class MainApp(QMainWindow,MAIN_WINDOW):
             self.labels[i+1].setText(str(freq[(i+1)*int(size)])+"-"+str(freq[(i+2)*int(size)]))
         self.labels[9].setText(str(freq[9 * int(size)])+"-"+str(freq[-1]))
         
-        eq_range = int(n/10)
-        band1=[]
-        band2=[]
-        band3=[]
-        band4=[]
-        band5=[]
-        band6=[]
-        band7=[]
-        band8=[]
-        band9=[]
-        band10=[]
+        n = int(N/10)
+        # band1=[]
+        # band2=[]
+        # band3=[]
+        # band4=[]
+        # band5=[]
+        # band6=[]
+        # band7=[]
+        # band8=[]
+        # band9=[]
+        # band10=[]
         ##cutting audio list into bands and multiplay it by sliders gain
-        i=0
-        for i in range(eq_range):
-            band1.append(yf[i]*gain1)
-        for i in range(2*eq_range):
-            band2.append(yf[i]*gain2)
-        for i in range(3*eq_range):
-            band3.append(yf[i]*gain3)
-        for i in range(4*eq_range):
-            band4.append(yf[i]*gain4)
-        for i in range(5*eq_range):
-            band5.append(yf[i]*gain5)
-        for i in range(6*eq_range):
-            band6.append(yf[i]*gain6)
-        for i in range(7*eq_range):
-            band7.append(yf[i]*gain7)
-        for i in range(8*eq_range):
-            band8.append(yf[i]*gain8)
-        for i in range(9*eq_range):
-            band9.append(yf[i]*gain9)
-        for i in range(10*eq_range):
-            band10.append(yf[i]*gain10)
+        # i=0
+        # for i in range(eq_range):
+        #     band1.append(yf[i]*gain1)
+        # for i in range(2*eq_range):
+        #     band2.append(yf[i]*gain2)
+        # for i in range(3*eq_range):
+        #     band3.append(yf[i]*gain3)
+        # for i in range(4*eq_range):
+        #     band4.append(yf[i]*gain4)
+        # for i in range(5*eq_range):
+        #     band5.append(yf[i]*gain5)
+        # for i in range(6*eq_range):
+        #     band6.append(yf[i]*gain6)
+        # for i in range(7*eq_range):
+        #     band7.append(yf[i]*gain7)
+        # for i in range(8*eq_range):
+        #     band8.append(yf[i]*gain8)
+        # for i in range(9*eq_range):
+        #     band9.append(yf[i]*gain9)
+        # for i in range(10*eq_range):
+        #     band10.append(yf[i]*gain10)
         # band1 = self.create_band(freq[21], freq[int(size)]) * gain1
         # band2 = self.create_band(freq[int(size)], freq[2 * int(size)]) * gain2
         # band3 = self.create_band(freq[2 * int(size)], freq[3 * int(size)]) * gain3
@@ -356,21 +360,35 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         # band8 = self.create_band(freq[7 * int(size)], freq[8 * int(size)]) * gain8
         # band9 = self.create_band(freq[8 * int(size)], freq[9 * int(size)]) * gain9
         # band10 = self.create_band(freq[9 * int(size)], freq[-1], order=3) * gain10
+        self.new_yf[0:n] = self.new_yf[0:n] * gain1
+        self.new_yf[n:2*n] = self.new_yf[n:2*n] * gain2
+        self.new_yf[2*n:3*n] = self.new_yf[2*n:3*n] * gain3
+        self.new_yf[3*n:4*n] = self.new_yf[3*n:4*n] * gain4
+        self.new_yf[4*n:5*n] = self.new_yf[4*n:5*n] * gain5
+        self.new_yf[5*n:6*n] = self.new_yf[5*n:6*n] * gain6
+        self.new_yf[6*n:7*n] = self.new_yf[6*n:7*n] * gain7
+        self.new_yf[7*n:8*n] = self.new_yf[7*n:8*n] * gain8
+        self.new_yf[8*n:9*n] = self.new_yf[8*n:9*n] * gain9
+        self.new_yf[9*n:10*n] = self.new_yf[9*n:10*n] * gain10
+
         
-        samples_after = band1 + band2 + band3 + band4 + band5 + band6 + band7 + band8 + band9 + band10
-        l_after = len(samples_after)
-        print(l_after,samples_after)
-        phase=np.angle(samples_after)
+        # samples_after = band1 + band2 + band3 + band4 + band5 + band6 + band7 + band8 + band9 + band10
+        #l_after = len(samples_after)
+        # print(l_after,samples_after)
+        phase=np.angle(self.new_yf)
+        mag=np.real(self.new_yf)
+        mod=np.multiply(mag,np.exp(1j*phase))
+        self.signal= scipy.ifft(mod)
         print(phase)
-        after_=[]
-        for i in range(l_after):
-            after_[i]=samples_after[i]*(math.cos(phase)+1*j*math.sin(phase))
-        after=np.real(scipy.fft.ifft(after_))
-        print(after)
-        self.current_samples = after
+        # after_=[]
+        # for i in range(l_after):
+        #     after_[i]=samples_after[i]*(math.cos(phase[i])+1j*math.sin(phase[i]))
+        # after=np.real(scipy.fft.ifft(after_))
+        # print(after)
+        # self.current_samples = after
         
-        self.plotAfter(after,sampling_rate,l_after)
-        self.plot_spectro(samples_after[:T*sampling_rate],sampling_rate)
+        self.plotAfter(np.real(self.signal),sampling_rate,n)
+        self.plot_spectro(np.real(self.signal),sampling_rate)
 
     def create_band(self, lowcut, highcut, order=4):
         #a function for band filtering
