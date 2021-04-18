@@ -6,6 +6,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from os import path
+import scipy
+from scipy.fft import fft, ifft, fftfreq
 import queue as Q
 import pandas as pd
 import numpy as np
@@ -13,20 +15,11 @@ import sys
 import os
 import pyqtgraph.exporters
 from scipy import signal
-from scipy.io.wavfile import read
 from scipy.io.wavfile import write
-import wave
-from scipy.signal import firwin,freqz
-
-#cant install this
-#import simpleaudio as sa
-
+import math
 from fpdf import FPDF
 import sounddevice as sd
-from scipy.fft import fft, fftfreq, rfft, rfftfreq
-from matplotlib import pyplot as plt
 import librosa
-from scipy.signal import butter, lfilter
 
 MAIN_WINDOW,_=loadUiType(path.join(path.dirname(__file__),"equalizer.ui"))
 
@@ -127,8 +120,8 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         self.samples_list[self.tabWidget.currentIndex()], self.sampling_rate_list[self.tabWidget.currentIndex()] = librosa.load(fileName, sr=None, mono=True, offset=0.0, duration=None)
         samples = self.samples_list[self.tabWidget.currentIndex()]
         self.current_samples = samples
+        global sampling_rate
         sampling_rate = self.sampling_rate_list[self.tabWidget.currentIndex()]
-        
         ## store length and time on their lists
         l=len(samples)
         self.T_list[self.tabWidget.currentIndex()] = int(l / sampling_rate)
@@ -146,50 +139,47 @@ class MainApp(QMainWindow,MAIN_WINDOW):
     def plotBefore(self,file,sampling_rate,length):
         ##plot before equalizing
         
-        n=length
-        T=1/sampling_rate
-        yf = rfft(file)
-        xf = rfftfreq(n,T)
         
+        # n=length
+        # T=1/sampling_rate
+        yf = fft(file)
+        self.new_yf=yf.copy()
+        # xf = fftfreq(N,T)
+        
+
         self.beforeWidget_list[self.tabWidget.currentIndex()].clear()
         
-        #self.beforeWidget_list[self.tabWidget.currentIndex()].plot(xf, np.abs(yf),pen="r")
-        self.beforeWidget_list[self.tabWidget.currentIndex()].plot(file[0:sampling_rate],pen="r")
-        #self.beforeWidget_list[self.tabWidget.currentIndex()].setLabel('bottom', "Frequency", units='Hz')
+        self.beforeWidget_list[self.tabWidget.currentIndex()].plot(file,pen="r")
         self.beforeWidget_list[self.tabWidget.currentIndex()].setLabel('bottom', "Time", units='s')
-        #self.beforeWidget_list[self.tabWidget.currentIndex()].setLabel('left', "Magnitude")
         self.beforeWidget_list[self.tabWidget.currentIndex()].setLabel('left', "Amplitude")
         
-        self.beforeWidget_list[self.tabWidget.currentIndex()].setLimits(xMin = 0, xMax=xf[-1])
-        self.beforeWidget_list[self.tabWidget.currentIndex()].plotItem.setTitle("Before")
-        self.beforeWidget_list[self.tabWidget.currentIndex()].enableAutoRange(axis='y')
+        # self.beforeWidget_list[self.tabWidget.currentIndex()].setLimits(xMin = 0, xMax=xf[-1])
+        # self.beforeWidget_list[self.tabWidget.currentIndex()].plotItem.setTitle("Before")
+        # self.beforeWidget_list[self.tabWidget.currentIndex()].enableAutoRange(axis='y')
 
     def plotAfter(self,file,sampling_rate,length):
         ##plot after equalizing
         
-        n=length
-        T=1/sampling_rate
-        yf = rfft(file)
-        xf = rfftfreq(n,T)
+        # n=length
+        #T=1/sampling_rate
+        # yf = rfft(file)
+        #xf = fftfreq(n,T)
         
         self.afterWidget_list[self.tabWidget.currentIndex()].clear()
         
-        #self.afterWidget_list[self.tabWidget.currentIndex()].plot(xf, np.abs(yf),pen="b")
-        self.afterWidget_list[self.tabWidget.currentIndex()].plot(file[0:sampling_rate],pen="b")
-        #self.afterWidget_list[self.tabWidget.currentIndex()].setLabel('bottom', "Frequency", units='Hz')
+        self.afterWidget_list[self.tabWidget.currentIndex()].plot(file,pen="b")
         self.afterWidget_list[self.tabWidget.currentIndex()].setLabel('bottom', "Time", units='s')
-        #self.afterWidget_list[self.tabWidget.currentIndex()].setLabel('left', "Magnitude")
         self.afterWidget_list[self.tabWidget.currentIndex()].setLabel('left', "Amplitude")
         
-        self.afterWidget_list[self.tabWidget.currentIndex()].setLimits(xMin = 0, xMax=xf[-1])
-        self.afterWidget_list[self.tabWidget.currentIndex()].plotItem.setTitle("After")
-        self.afterWidget_list[self.tabWidget.currentIndex()].enableAutoRange(axis = "y")
+        # self.afterWidget_list[self.tabWidget.currentIndex()].setLimits(xMin = 0, xMax=xf[-1])
+        # self.afterWidget_list[self.tabWidget.currentIndex()].plotItem.setTitle("After")
+        # self.afterWidget_list[self.tabWidget.currentIndex()].enableAutoRange(axis = "y")
         sd.play(file, sampling_rate)
 
     def play_audio(self):
         sd.play(self.samples_list[self.tabWidget.currentIndex()], self.sampling_rate_list[self.tabWidget.currentIndex()])
 
-    def plot_spectro(self,file , fs):
+    def plot_spectro(self, file , fs):
         #### self.spectroWidget is the plot widget u can change it
         self.spectroWidget_list[self.tabWidget.currentIndex()].clear()
         # Interpret image data as row-major instead of col-major
@@ -236,7 +226,7 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         self.spectroSliderLabel1.setText(str(self.min_list[0]))
         self.spectroSliderLabel2.setText(str(self.max_list[0]))
         
-        self.plot_spectro(samples[:T*sampling_rate],sampling_rate)
+        self.plot_spectro(samples,sampling_rate)
     
     def slidersGains(self):
         ##check sliders gains
@@ -254,7 +244,7 @@ class MainApp(QMainWindow,MAIN_WINDOW):
             tempgainArray.append(temp[i].value())
             
         self.gainArrays[self.tabWidget.currentIndex()] = tempgainArray
-        print(self.gainArrays[self.tabWidget.currentIndex()])
+        #print(self.gainArrays[self.tabWidget.currentIndex()])
         
         self.processing(*self.gainArrays[self.tabWidget.currentIndex()])
 
@@ -270,31 +260,31 @@ class MainApp(QMainWindow,MAIN_WINDOW):
             self.RGB_Pallete1 = (0, 182, 188, 255)
             self.RGB_Pallete2 = (246, 111, 0, 255)
             self.RGB_Pallete3 = (75, 0, 113, 255)
-            self.plot_spectro(samples[:T*sampling_rate],sampling_rate)
+            self.plot_spectro(samples,sampling_rate)
             
         if self.comboBox_list[self.tabWidget.currentIndex()].currentText() == "Palette1":
             self.RGB_Pallete1 = (108, 79, 60, 255)
             self.RGB_Pallete2 = (100, 83, 148, 255)
             self.RGB_Pallete3 = (0, 166, 140, 255)
-            self.plot_spectro(samples[:T*sampling_rate],sampling_rate)
+            self.plot_spectro(samples,sampling_rate)
             
         if self.comboBox_list[self.tabWidget.currentIndex()].currentText() == "Palette2":
             self.RGB_Pallete1 = (0, 255, 0, 255)
             self.RGB_Pallete2 = (255, 0, 0, 255)
             self.RGB_Pallete3 = (0, 0, 255, 255)
-            self.plot_spectro(samples[:T*sampling_rate],sampling_rate)
+            self.plot_spectro(samples,sampling_rate)
             
         if self.comboBox_list[self.tabWidget.currentIndex()].currentText() == "Palette3":
             self.RGB_Pallete1 = (219, 178, 209, 255)
             self.RGB_Pallete2 = (147, 71, 66, 255)
             self.RGB_Pallete3 = (108, 160, 220, 255)
-            self.plot_spectro(samples[:T*sampling_rate],sampling_rate)
+            self.plot_spectro(samples,sampling_rate)
             
         if self.comboBox_list[self.tabWidget.currentIndex()].currentText() == "Palette4":
             self.RGB_Pallete1 = (236, 219, 83, 255)
             self.RGB_Pallete2 = (227, 65, 50, 255)
             self.RGB_Pallete3 = (219, 178, 209, 255)
-            self.plot_spectro(samples[:T*sampling_rate],sampling_rate)
+            self.plot_spectro(samples,sampling_rate)
 
     def processing(self,gain1,gain2,gain3,gain4,gain5,gain6,gain7,gain8,gain9,gain10):
         ## multiplay the gain of sliders to the audio list
@@ -310,41 +300,28 @@ class MainApp(QMainWindow,MAIN_WINDOW):
             self.labels[i+1].setText(str(freq[(i+1)*int(size)])+"-"+str(freq[(i+2)*int(size)]))
         self.labels[9].setText(str(freq[9 * int(size)])+"-"+str(freq[-1]))
         
-        ##cutting audio list into bands and multiplay it by sliders gain
-        band1 = self.create_band(freq[21], freq[int(size)]) * gain1
-        band2 = self.create_band(freq[int(size)], freq[2 * int(size)]) * gain2
-        band3 = self.create_band(freq[2 * int(size)], freq[3 * int(size)]) * gain3
-        band4 = self.create_band(freq[3 * int(size)], freq[4 * int(size)]) * gain4
-        band5 = self.create_band(freq[4 * int(size)], freq[5 * int(size)]) * gain5
-        band6 = self.create_band(freq[5 * int(size)], freq[6 * int(size)]) * gain6
-        band7 = self.create_band(freq[6 * int(size)], freq[7 * int(size)]) * gain7
-        band8 = self.create_band(freq[7 * int(size)], freq[8 * int(size)]) * gain8
-        band9 = self.create_band(freq[8 * int(size)], freq[9 * int(size)]) * gain9
-        band10 = self.create_band(freq[9 * int(size)], freq[-1], order=3) * gain10
+        n = int(sampling_rate/10)
         
-        samples_after = band1 + band2 + band3 + band4 + band5 + band6 + band7 + band8 + band9 + band10
-        l_after = len(samples_after)
-        
-        self.current_samples = samples_after
-        
-        self.plotAfter(samples_after,sampling_rate,l_after)
-        self.plot_spectro(samples_after[:T*sampling_rate],sampling_rate)
+        self.new_yf[0:n] = self.new_yf[0:n] * gain1
+        self.new_yf[n:2*n] = self.new_yf[n:2*n] * gain2
+        self.new_yf[2*n:3*n] = self.new_yf[2*n:3*n] * gain3
+        self.new_yf[3*n:4*n] = self.new_yf[3*n:4*n] * gain4
+        self.new_yf[4*n:5*n] = self.new_yf[4*n:5*n] * gain5
+        self.new_yf[5*n:6*n] = self.new_yf[5*n:6*n] * gain6
+        self.new_yf[6*n:7*n] = self.new_yf[6*n:7*n] * gain7
+        self.new_yf[7*n:8*n] = self.new_yf[7*n:8*n] * gain8
+        self.new_yf[8*n:9*n] = self.new_yf[8*n:9*n] * gain9
+        self.new_yf[9*n:10*n] = self.new_yf[9*n:10*n] * gain10
 
-    def create_band(self, lowcut, highcut, order=4):
-        #a function for band filtering
+        phase=np.angle(self.new_yf)
+        mag=np.abs(self.new_yf)
+        mod=np.multiply(mag,np.exp(1j*phase))
+        self.signal= scipy.ifft(mod)
+
+        self.current_samples = np.real(self.signal)
         
-        samples = self.samples_list[self.tabWidget.currentIndex()]
-        sampling_rate = self.sampling_rate_list[self.tabWidget.currentIndex()]
-        
-        nyquistfreq = 0.5 * sampling_rate
-        
-        low = lowcut / nyquistfreq
-        high = highcut / nyquistfreq
-        
-        b, a = butter(order, [low, high], btype='band', analog=False)
-        
-        filtered = lfilter(b, a, samples)
-        return filtered
+        self.plotAfter(np.real(self.signal),sampling_rate,n)
+        self.plot_spectro(np.real(self.signal),sampling_rate)
 
     def speedUp(self):
         if self.step <= 100 :
@@ -457,6 +434,9 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         pdf.output("report"+str(self.tabWidget.currentIndex()+1)+".pdf", "F") 
         
         print("Report PDF is ready")
+
+        #save the audio file
+        write("myFinalAudio.wav",sampling_rate,np.real(self.signal))
 
 if __name__=='__main__':
     app = QApplication(sys.argv)
