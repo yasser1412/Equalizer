@@ -7,7 +7,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from os import path
 import scipy
-from scipy.fft import fft, ifft, fftfreq
+from scipy.fft import fft, ifft, fftfreq, rfftfreq
 import queue as Q
 import pandas as pd
 import numpy as np
@@ -30,8 +30,11 @@ class MainApp(QMainWindow,MAIN_WINDOW):
     RGB_Pallete3 = (75, 0, 113, 255)
     
     ## min , max pixel intensity
-    min_list = [0.0,0.0,0.0]
-    max_list = [1.0,1.0,1.0]
+    min_list = [0,0,0]
+    max_list = [0,0,0]
+    
+    min_ = [0.5,0.5,0.5]
+    max_ = [1.0,1.0,1.0]
     
     vSliders = []
     
@@ -56,7 +59,7 @@ class MainApp(QMainWindow,MAIN_WINDOW):
     current_samples = []
     
     ##for graph speed
-    step = 10
+    step = 5
     
     def __init__(self,parent=None):
         super(MainApp,self).__init__(parent)
@@ -98,10 +101,15 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         self.rightBtn.triggered.connect(self.move_right)
         self.speedBtn.triggered.connect(self.speedUp)
         self.slowBtn.triggered.connect(self.speedDown)
-        self.spectroSliderLabel1.setText("0.0")
-        self.spectroSliderLabel2.setText("1.0")
-        
+        self.spectroSliderLabel1.setText("0")
+        self.spectroSliderLabel2.setText("0")
+        self.speedLabel.setText("1x")
         for i in range(3):
+            self.spectroSlider1_list[i].setMinimum(0)
+            self.spectroSlider2_list[i].setMinimum(0)
+            self.spectroSlider1_list[i].setMaximum(10)
+            self.spectroSlider2_list[i].setMaximum(10)
+            self.spectroSlider2_list[i].setValue(0)
             self.spectroSlider1_list[i].valueChanged.connect(self.setMin_Max)
             self.spectroSlider2_list[i].valueChanged.connect(self.setMin_Max)
             
@@ -120,7 +128,6 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         self.samples_list[self.tabWidget.currentIndex()], self.sampling_rate_list[self.tabWidget.currentIndex()] = librosa.load(fileName, sr=None, mono=True, offset=0.0, duration=None)
         samples = self.samples_list[self.tabWidget.currentIndex()]
         self.current_samples = samples
-        global sampling_rate
         sampling_rate = self.sampling_rate_list[self.tabWidget.currentIndex()]
         ## store length and time on their lists
         l=len(samples)
@@ -139,13 +146,12 @@ class MainApp(QMainWindow,MAIN_WINDOW):
     def plotBefore(self,file,sampling_rate,length):
         ##plot before equalizing
         
-        
-        # n=length
-        # T=1/sampling_rate
+        global yf, phase
+        n=length
+        T=1/sampling_rate
         yf = fft(file)
-        self.new_yf=yf.copy()
-        # xf = fftfreq(N,T)
-        
+        phase=np.angle(yf)
+        xf = rfftfreq(n,T)        
 
         self.beforeWidget_list[self.tabWidget.currentIndex()].clear()
         
@@ -153,17 +159,16 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         self.beforeWidget_list[self.tabWidget.currentIndex()].setLabel('bottom', "Time", units='s')
         self.beforeWidget_list[self.tabWidget.currentIndex()].setLabel('left', "Amplitude")
         
-        # self.beforeWidget_list[self.tabWidget.currentIndex()].setLimits(xMin = 0, xMax=xf[-1])
-        # self.beforeWidget_list[self.tabWidget.currentIndex()].plotItem.setTitle("Before")
-        # self.beforeWidget_list[self.tabWidget.currentIndex()].enableAutoRange(axis='y')
+        self.beforeWidget_list[self.tabWidget.currentIndex()].setLimits(xMin = 0, xMax=xf[-1])
+        self.beforeWidget_list[self.tabWidget.currentIndex()].plotItem.setTitle("Before")
+        self.beforeWidget_list[self.tabWidget.currentIndex()].enableAutoRange(axis='y')
 
     def plotAfter(self,file,sampling_rate,length):
         ##plot after equalizing
         
-        # n=length
-        #T=1/sampling_rate
-        # yf = rfft(file)
-        #xf = fftfreq(n,T)
+        n=length
+        T=1/sampling_rate
+        xf = rfftfreq(n,T)
         
         self.afterWidget_list[self.tabWidget.currentIndex()].clear()
         
@@ -171,15 +176,15 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         self.afterWidget_list[self.tabWidget.currentIndex()].setLabel('bottom', "Time", units='s')
         self.afterWidget_list[self.tabWidget.currentIndex()].setLabel('left', "Amplitude")
         
-        # self.afterWidget_list[self.tabWidget.currentIndex()].setLimits(xMin = 0, xMax=xf[-1])
-        # self.afterWidget_list[self.tabWidget.currentIndex()].plotItem.setTitle("After")
-        # self.afterWidget_list[self.tabWidget.currentIndex()].enableAutoRange(axis = "y")
+        self.afterWidget_list[self.tabWidget.currentIndex()].setLimits(xMin = 0, xMax=xf[-1])
+        self.afterWidget_list[self.tabWidget.currentIndex()].plotItem.setTitle("After")
+        self.afterWidget_list[self.tabWidget.currentIndex()].enableAutoRange(axis = "y")
         sd.play(file, sampling_rate)
 
     def play_audio(self):
         sd.play(self.samples_list[self.tabWidget.currentIndex()], self.sampling_rate_list[self.tabWidget.currentIndex()])
 
-    def plot_spectro(self, file , fs):
+    def plot_spectro(self,file , fs):
         #### self.spectroWidget is the plot widget u can change it
         self.spectroWidget_list[self.tabWidget.currentIndex()].clear()
         # Interpret image data as row-major instead of col-major
@@ -200,16 +205,16 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         # This gradient is roughly comparable to the gradient used by Matplotlib
         # You can adjust it and then save it using hist.gradient.saveState()
         hist.gradient.restoreState(
-        {'mode': 'rgb','ticks': [(0.5, self.RGB_Pallete1)
-                                ,(self.max_list[self.tabWidget.currentIndex()], self.RGB_Pallete2)
-                                ,(self.min_list[self.tabWidget.currentIndex()], self.RGB_Pallete3)]})
+        {'mode': 'rgb','ticks': [(self.min_[self.tabWidget.currentIndex()], self.RGB_Pallete1)
+                                ,(self.max_[self.tabWidget.currentIndex()], self.RGB_Pallete2)
+                                ,(0.0, self.RGB_Pallete3)]})
         
         # Sxx contains the amplitude for each pixel
         img.setImage(Sxx)
         # Scale the X and Y Axis to time and frequency (standard is pixels)
         img.scale(t[-1]/np.size(Sxx, axis=1),f[-1]/np.size(Sxx, axis=0))
         # Limit panning/zooming
-        self.spectroWidget_list[self.tabWidget.currentIndex()].setLimits(xMin=t[0], xMax=t[-1], yMin=f[0], yMax=f[-1])
+        self.spectroWidget_list[self.tabWidget.currentIndex()].setLimits(xMin=t[0], xMax=t[-1], yMin=f[0]+self.min_list[self.tabWidget.currentIndex()], yMax=f[-1]-self.max_list[self.tabWidget.currentIndex()])
         #self.spectroWidget_list[self.tabWidget.currentIndex()].setYRange(np.min(f),np.max(f)-100)
         self.spectroWidget_list[self.tabWidget.currentIndex()].setLabel('bottom', "Time", units='s')
         self.spectroWidget_list[self.tabWidget.currentIndex()].setLabel('left', "Frequency", units='Hz')
@@ -220,13 +225,16 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         sampling_rate = self.sampling_rate_list[self.tabWidget.currentIndex()]
         T = self.T_list[self.tabWidget.currentIndex()]
         
-        self.min_list[self.tabWidget.currentIndex()] = self.spectroSlider1_list[self.tabWidget.currentIndex()].value()/10
-        self.max_list[self.tabWidget.currentIndex()] = self.spectroSlider2_list[self.tabWidget.currentIndex()].value()/10
+        self.min_list[self.tabWidget.currentIndex()] = self.spectroSlider1_list[self.tabWidget.currentIndex()].value()*1000
+        self.max_list[self.tabWidget.currentIndex()] = self.spectroSlider2_list[self.tabWidget.currentIndex()].value()*1000
+        
+        self.min_[self.tabWidget.currentIndex()] = (5 - self.spectroSlider1_list[self.tabWidget.currentIndex()].value())/10
+        self.max_[self.tabWidget.currentIndex()] = (10 - self.spectroSlider2_list[self.tabWidget.currentIndex()].value())/10
         
         self.spectroSliderLabel1.setText(str(self.min_list[0]))
         self.spectroSliderLabel2.setText(str(self.max_list[0]))
         
-        self.plot_spectro(samples,sampling_rate)
+        self.plot_spectro(samples[:T*sampling_rate],sampling_rate)
     
     def slidersGains(self):
         ##check sliders gains
@@ -302,6 +310,8 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         
         n = int(sampling_rate/10)
         
+        self.new_yf=yf.copy()
+        
         self.new_yf[0:n] = self.new_yf[0:n] * gain1
         self.new_yf[n:2*n] = self.new_yf[n:2*n] * gain2
         self.new_yf[2*n:3*n] = self.new_yf[2*n:3*n] * gain3
@@ -313,7 +323,6 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         self.new_yf[8*n:9*n] = self.new_yf[8*n:9*n] * gain9
         self.new_yf[9*n:10*n] = self.new_yf[9*n:10*n] * gain10
 
-        phase=np.angle(self.new_yf)
         mag=np.abs(self.new_yf)
         mod=np.multiply(mag,np.exp(1j*phase))
         self.signal= scipy.ifft(mod)
@@ -324,7 +333,7 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         self.plot_spectro(np.real(self.signal),sampling_rate)
 
     def speedUp(self):
-        if self.step <= 100 :
+        if self.step <= 50 :
             self.step +=5
         else:
             pass
@@ -436,7 +445,10 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         print("Report PDF is ready")
 
         #save the audio file
-        write("myFinalAudio.wav",sampling_rate,np.real(self.signal))
+        m = np.max(np.abs(self.current_samples))
+        signal = (self.current_samples / m).astype(np.float32)
+        fs = self.sampling_rate_list[self.tabWidget.currentIndex()]
+        write("equalized_audio.wav", fs, signal)
 
 if __name__=='__main__':
     app = QApplication(sys.argv)
