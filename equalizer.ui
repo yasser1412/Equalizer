@@ -1496,6 +1496,19 @@
      </widget>
     </widget>
    </widget>
+   <widget class="QLabel" name="speedLabel">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>0</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -1512,14 +1525,19 @@
     <bool>false</bool>
    </attribute>
    <addaction name="OpenSignalBtn"/>
+   <addaction name="separator"/>
    <addaction name="playBtn"/>
    <addaction name="pauseBtn"/>
    <addaction name="stopBtn"/>
+   <addaction name="separator"/>
    <addaction name="zoomInBtn"/>
    <addaction name="zoomOutBtn"/>
+   <addaction name="separator"/>
    <addaction name="rightBtn"/>
    <addaction name="leftBtn"/>
+   <addaction name="separator"/>
    <addaction name="saveBtn"/>
+   <addaction name="separator"/>
    <addaction name="speedBtn"/>
    <addaction name="slowBtn"/>
   </widget>
