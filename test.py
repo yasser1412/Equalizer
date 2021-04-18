@@ -17,6 +17,7 @@ import sounddevice as sd
 from scipy.fft import fft, fftfreq, rfft, rfftfreq , irfft
 import librosa
 from scipy.signal import butter, lfilter
+from scipy.io.wavfile import write
 
 MAIN_WINDOW,_=loadUiType(path.join(path.dirname(__file__),"equalizer.ui"))
 
@@ -458,7 +459,9 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         pdf.output("report"+str(self.tabWidget.currentIndex()+1)+".pdf", "F") 
         
         print("Report PDF is ready")
-
+        
+        #save the audio file
+        write("equalized_audio.wav", self.sampling_rate_list[self.tabWidget.currentIndex()], self.current_samples)
 if __name__=='__main__':
     app = QApplication(sys.argv)
     window = MainApp()
