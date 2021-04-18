@@ -1509,6 +1509,22 @@
      <string>TextLabel</string>
     </property>
    </widget>
+   <widget class="QCheckBox" name="spectroShow">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>0</y>
+      <width>201</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Show/Hide Spectrogram</string>
+    </property>
+    <property name="shortcut">
+     <string>Ctrl+H</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
