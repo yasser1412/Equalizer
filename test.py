@@ -461,7 +461,11 @@ class MainApp(QMainWindow,MAIN_WINDOW):
         print("Report PDF is ready")
         
         #save the audio file
-        write("equalized_audio.wav", self.sampling_rate_list[self.tabWidget.currentIndex()], self.current_samples)
+        m = np.max(np.abs(self.current_samples))
+        signal = (self.current_samples / m).astype(np.float32)
+        fs = self.sampling_rate_list[self.tabWidget.currentIndex()]
+        write("equalized_audio.wav", fs, signal)
+        
 if __name__=='__main__':
     app = QApplication(sys.argv)
     window = MainApp()
